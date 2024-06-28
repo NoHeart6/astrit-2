@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Program Aljabar Matriks</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+    
+    body {
+      background-color: #111;
+      background-image: url('https://images.unsplash.com/photo-1589820296154-c2903fb9de7d');
+      background-repeat: no-repeat;
+      background-size: cover;
+      color: #eee;
+      font-family: 'Roboto Condensed', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .container {
+      background-color: rgba(0, 0, 0, 0.85);
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.9);
+      max-width: 600px;
+      width: 90%;
+      position: relative;
+      max-height: 80vh;
+      overflow-y: auto;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      color: #ffdd00;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.8);
+      margin-bottom: 20px;
+      font-size: 36px;
+    }
+
+    label {
+      color: #eee;
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    select,
+    input[type='number'] {
+      width: calc(100% - 20px);
+      padding: 12px;
+      margin: 8px 0;
+      border: 1px solid #333;
+      border-radius: 4px;
+      background-color: #222;
+      color: #eee;
+      font-family: 'Roboto Condensed', sans-serif;
+      transition: all 0.3s ease;
+    }
+
+    select:focus,
+    input[type='number']:focus {
+      border-color: #ffdd00;
+      box-shadow: 0 0 8px rgba(255, 221, 0, 0.8);
+      outline: none;
+    }
+
+    button {
+      background-color: #ffdd00;
+      color: #111;
+      padding: 14px 28px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 20px;
+      font-weight: bold;
+      transition: background-color 0.3s, transform 0.3s;
+      animation: pulse 1s infinite alternate;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #d4af01;
+      transform: scale(1.1);
+    }
+
+    button:disabled {
+      background-color: #555;
+      cursor: wait;
+    }
+
+    table {
+      width: 100%;
+      max-width: 400px;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      border: 1px solid #333;
+      padding: 10px;
+      text-align: center;
+      background-color: #222;
+      color: #eee;
+      transition: background-color 0.3s;
+    }
+
+    th {
+      background-color: #333;
+      color: #ffdd00;
+    }
+
+    caption {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #eee;
+    }
+
+    #hasil {
+      margin-top: 20px;
+      font-size: 18px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+      color: #eee;
+      padding: 10px;
+      border: 1px solid #ffdd00;
+      border-radius: 8px;
+    }
+
+    #hasil.show {
+      opacity: 1;
+    }
+
+    /* Watermark */
+    .watermark {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 14px;
+    }
+
+    /* Animasi Pulse */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+
+    /* Media Query for Responsiveness */
+    @media (max-width: 500px) {
+      .container {
+        max-width: 95%;
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      button {
+        font-size: 16px;
+      }
+
+      table {
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Program Aljabar Matriks</h1>
+
+    <label for="operasi">Operasi:</label>
+    <select id="operasi" onchange="generateMatrixInputs()">
+      <option value="determinan">Determinan</option>
+      <option value="invers">Invers</option>
+      <option value="transpose">Transpose</option>
+      <option value="tambah">Penjumlahan</option>
+      <option value="kurang">Pengurangan</option>
+      <option value="kali">Perkalian</option>
+    </select> <br>
+
+    <label for="ukuran">Ukuran Matriks:</label>
+    <select id="ukuran" onchange="generateMatrixInputs()">
+      <option value="2">2x2</option>
+      <option value="3">3x3</option>
+    </select> <br>
+
+    <div id="inputMatriks"></div>
+
+    <button onclick="hitung()">Hitung</button>
+    <div id="hasil"></div>
+
+    <div class="watermark">Dibuat oleh Astrit Dwi Antika untuk Tugas Mata Kuliah Aljabar</div>
+  </div>
+
+  <script>
+    function generateMatrixInputs() {
+      const ukuran = parseInt(document.getElementById('ukuran').value);
+      const operasi = document.getElementById('operasi').value;
+      const inputMatriks = document.getElementById('inputMatriks');
+      
+      inputMatriks.innerHTML = '';
+      let matriksCount = (operasi === 'tambah' || operasi === 'kurang' || operasi === 'kali') ? 2 : 1;
+
+      for (let k = 0; k < matriksCount; k++) {
+        let table = document.createElement('table');
+        table.id = `matriks${k + 1}`;
+        for (let i = 0; i < ukuran; i++) {
+          let tr = document.createElement('tr');
+          for (let j = 0; j < ukuran; j++) {
+            let td = document.createElement('td');
+            let input = document.createElement('input');
+            input.type = 'number';
+            input.id = `matriks${k + 1}-${i}-${j}`;
+            input.placeholder = `M${k + 1}[${i + 1},${j + 1}]`;
+            td.appendChild(input);
+            tr.appendChild(td);
+          }
+          table.appendChild(tr);
+        }
+        inputMatriks.appendChild(table);
+      }
+    }
+
+    function hitung() {
+      const operasi = document.getElementById('operasi').value;
+      const ukuran = parseInt(document.getElementById('ukuran').value);
+      let hasil = document.getElementById('hasil');
+      hasil.className = ''; // Remove show class to reset animation
+
+      let matriks1 = [];
+      let matriks2 = [];
+
+      for (let i = 0; i < ukuran; i++) {
+        matriks1[i] = [];
+        matriks2[i] = [];
+        for (let j = 0; j < ukuran; j++) {
+          matriks1[i][j] = parseFloat(document.getElementById(`matriks1-${i}-${j}`).value);
+          if (document.getElementById(`matriks2-0-0`)) {
+            matriks2[i][j] = parseFloat(document.getElementById(`matriks2-${i}-${j}`).value);
+          }
+        }
+      }
+
+      let result = null;
+      switch (operasi) {
+        case 'determinan':
+          result = determinan(matriks1);
+          break;
+        case 'invers':
+          result = invers(matriks1);
+          break;
+        case 'transpose':
+          result = transpose(matriks1);
+          break;
+        case 'tambah':
+          result = tambah(matriks1, matriks2);
+          break;
+        case 'kurang':
+          result = kurang(matriks1, matriks2);
+          break;
+        case 'kali':
+          result = kali(matriks1, matriks2);
+          break;
+        default:
+          result = 'Operasi tidak dikenal';
+      }
+
+      hasil.innerHTML = '<strong>Hasil:</strong><br>' + result;
+      hasil.className = 'show';
+    }
+
+    function determinan(matrix) {
+      if (matrix.length === 2) {
+        return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+      } else if (matrix.length === 3) {
+        let a = matrix[0][0], b = matrix[0][1], c = matrix[0][2];
+        let d = matrix[1][0], e = matrix[1][1], f = matrix[1][2];
+        let g = matrix[2][0], h = matrix[2][1], i = matrix[2][2];
+        return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+      } else {
+        return 'Ukuran matriks tidak didukung untuk determinan';
+      }
+    }
+
+    function invers(matrix) {
+      if (matrix.length === 2) {
+        let determinant = determinan(matrix);
+        if (determinant === 0) return 'Matriks tidak memiliki invers';
+        let invDet = 1 / determinant;
+        return [
+          [matrix[1][1] * invDet, -matrix[0][1] * invDet],
+          [-matrix[1][0] * invDet, matrix[0][0] * invDet]
+        ];
+      } else {
+        return 'Ukuran matriks tidak didukung untuk invers';
+      }
+    }
+
+    function transpose(matrix) {
+      let result = [];
+      for (let i = 0; i < matrix.length; i++) {
+        result[i] = [];
+        for (let j = 0; j < matrix.length; j++) {
+          result[i][j] = matrix[j][i];
+        }
+      }
+      return result;
+    }
+
+    function tambah(matrix1, matrix2) {
+      let result = [];
+      for (let i = 0; i < matrix1.length; i++) {
+        result[i] = [];
+        for (let j = 0; j < matrix1.length; j++) {
+          result[i][j] = matrix1[i][j] + matrix2[i][j];
+        }
+      }
+      return result;
+    }
+
+    function kurang(matrix1, matrix2) {
+      let result = [];
+      for (let i = 0; i < matrix1.length; i++) {
+        result[i] = [];
+        for (let j = 0; j < matrix1.length; j++) {
+          result[i][j] = matrix1[i][j] - matrix2[i][j];
+        }
+      }
+      return result;
+    }
+
+    function kali(matrix1, matrix2) {
+      let result = [];
+      for (let i = 0; i < matrix1.length; i++) {
+        result[i] = [];
+        for (let j = 0; j < matrix2[0].length; j++) {
+          result[i][j] = 0;
+          for (let k = 0; k < matrix1[0].length; k++) {
+            result[i][j] += matrix1[i][k] * matrix2[k][j];
+          }
+        }
+      }
+      return result;
+    }
+  </script>
+</body>
+</html>
